@@ -1,0 +1,26 @@
+{
+  "name": "Career Guidance Agent",
+  "forwardPorts": [3000, 8000],
+  "portsAttributes": {
+    "3000": {
+      "label": "Frontend",
+      "onAutoForward": "openPreview"
+    },
+    "8000": {
+      "label": "Backend API",
+      "onAutoForward": "notify",
+      "visibility": "public"  // ⬅️ IMPOSTA PUBLIC PERMANENTE
+    }
+  },
+  "postCreateCommand": "cd backend && pip install -r requirements.txt && cd ../frontend && npm install",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "esbenp.prettier-vscode",
+        "bradlc.vscode-tailwindcss"
+      ]
+    }
+  }
+}

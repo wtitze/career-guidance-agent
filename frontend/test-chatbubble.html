@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <style>
+    .user-bubble { background: #3b82f6; color: white; border-radius: 18px 18px 4px 18px; }
+    .bot-bubble { background: #f3f4f6; color: #374151; border-radius: 18px 18px 18px 4px; }
+  </style>
+</head>
+<body class="p-8 bg-gray-50">
+  <h2 class="text-xl font-bold mb-4">Anteprima ChatBubble:</h2>
+  
+  <!-- Messaggio assistente -->
+  <div class="flex justify-start mb-4">
+    <div class="flex max-w-[80%]">
+      <div class="flex-shrink-0 mr-3">
+        <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
+          🤖
+        </div>
+      </div>
+      <div class="bg-gray-100 text-gray-800 rounded-2xl rounded-tl-none px-4 py-3">
+        <p class="text-sm">Ciao! Sono il tuo assistente per l'orientamento.</p>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Messaggio utente -->
+  <div class="flex justify-end mb-4">
+    <div class="flex max-w-[80%] flex-row-reverse">
+      <div class="flex-shrink-0 ml-3">
+        <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
+          👤
+        </div>
+      </div>
+      <div class="bg-blue-500 text-white rounded-2xl rounded-tr-none px-4 py-3">
+        <p class="text-sm">Quali università mi consigli?</p>
+      </div>
+    </div>
+  </div>
+  
+  <p class="text-gray-600 text-sm mt-8">Questo è come appariranno i messaggi nella chat.</p>
+</body>
+</html>
