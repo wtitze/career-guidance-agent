@@ -1,0 +1,64 @@
+#!/usr/bin/env python3
+"""
+Script di test per verificare che il backend funzioni
+"""
+import sys
+import os
+
+# Aggiungi la directory corrente al path
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+def test_imports():
+    """Testa che tutte le importazioni funzionino"""
+    try:
+        from main import app
+        print("✅ Import di FastAPI riuscito")
+        
+        # Verifica che l'app abbia gli endpoint corretti
+        routes = [(route.path, route.methods) for route in app.routes]
+        print(f"✅ Trovati {len(routes)} endpoint:")
+        for path, methods in routes:
+            print(f"   - {path} {methods}")
+        
+        return True
+    except Exception as e:
+        print(f"❌ Errore nelle importazioni: {e}")
+        return False
+
+def test_environment():
+    """Testa che le variabili d'ambiente siano configurate"""
+    required_dirs = [
+        "../data/cache",
+        "../data/sqlite",
+        "../data/fallback"
+    ]
+    
+    all_exist = True
+    for dir_path in required_dirs:
+        if os.path.exists(dir_path):
+            print(f"✅ Directory {dir_path} esiste")
+        else:
+            print(f"❌ Directory {dir_path} mancante")
+            all_exist = False
+    
+    return all_exist
+
+if __name__ == "__main__":
+    print("🧪 Test del backend...")
+    print("-" * 40)
+    
+    success = True
+    
+    # Esegui i test
+    if not test_environment():
+        success = False
+    
+    if not test_imports():
+        success = False
+    
+    print("-" * 40)
+    if success:
+        print("🎉 Tutti i test passati! Il backend è configurato correttamente.")
+    else:
+        print("⚠️  Alcuni test falliti. Controlla la configurazione.")
+        sys.exit(1)
