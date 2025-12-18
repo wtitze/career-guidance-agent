@@ -5,7 +5,6 @@ import os
 import json
 from typing import Dict, Any, Optional, Tuple, List
 from google import genai
-from .web_searcher import WebSearcher
 from google.genai import types
 from dotenv import load_dotenv
 
@@ -249,84 +248,21 @@ La tua risposta deve essere SOLO la domanda, senza spiegazioni."""
                 return "Dimmi di più sui tuoi obiettivi dopo il diploma."
     
     def _generate_recommendation_response(self, profile: StudentProfile, user_message: str) -> str:
-        """Genera una risposta con raccomandazioni BASATE SU RICERCA WEB."""
-        # 1. Inizializza web searcher
-        if not hasattr(self, 'web_searcher'):
-            self.web_searcher = WebSearcher()
-        
-        # 2. Cerca informazioni reali sul web
-        profile_data = {
-            "favorite_subjects": profile.favorite_subjects,
-            "location": profile.location,
-            "school_type": profile.school_type,
-            "primary_goal": profile.primary_goal,
-            "institution_preference": profile.institution_preference
-        }
-        
-        print(f"🔍 Avvio ricerca web per: {profile_data["favorite_subjects"]} a {profile_data["location"]}")
-        
-        try:
-            search_results = self.web_searcher.search_for_student_profile(profile_data)
-            has_web_results = (search_results["university_courses"]["university_results"] > 0 or 
-                              search_results["its_courses"]["its_results"] > 0)
-        except Exception as e:
-            print(f"⚠️  Errore ricerca web: {e}")
-            search_results = {}
-            has_web_results = False
-        
-        # 3. Costruisci il contesto
+        """Genera una risposta con raccomandazioni."""
         context = self._build_profile_context(profile, user_message)
         
-        # 4. Prompt diverso se abbiamo risultati web
-        if has_web_results:
-            prompt = f"""Sei un orientatore universitario ESPERTO. Hai informazioni AGGIORNATE dal web.
-
-PROFILO STUDENTE:
-{context}
-
-RISULTATI RICERCA WEB:"""
-            
-            # Aggiungi risultati università
-            uni_courses = search_results.get("university_courses", {}).get("courses", [])
-            if uni_courses:
-                prompt += "\n📚 CORSI UNIVERSITARI TROVATI:\n"
-                for i, course in enumerate(uni_courses[:2], 1):
-                    prompt += f"{i}. {course["name"]} - {course.get("university", "università")}\n"
-                    if course.get("snippet"):
-                        prompt += f"   Info: {course["snippet"]}\n"
-            
-            # Aggiungi risultati ITS
-            its_courses = search_results.get("its_courses", {}).get("courses", [])
-            if its_courses:
-                prompt += "\n🔧 CORSI ITS TROVATI:\n"
-                for i, course in enumerate(its_courses[:2], 1):
-                    prompt += f"{i}. {course["name"][:80]}...\n"
-                    if course.get("duration"):
-                        prompt += f"   Durata: {course["duration"]}\n"
-            
-            prompt += """
-
-BASANDOTI SUL PROFILO DELLO STUDENTE E SUI RISULTATI REALI TROVATI:
-1. Fornisci un riepilogo PERSONALIZZATO
-2. Suggerisci 2-3 percorsi CONCRETI
-3. Includi CONSIGLI PRATICI
-
-Sii INCORAGGIANTE, PROFESSIONALE e BASATO SUI DATI REALI."""
-        
-        else:
-            # Fallback: prompt senza risultati web
-            prompt = f"""Sei un orientatore universitario.
+        prompt = f"""Sei un orientatore universitario. Lo studente ha fornito informazioni sufficienti.
 
 {context}
 
 Il profilo è completo al {profile.profile_completeness*100:.1f}%.
 
 FORNISCI:
-1. Un breve riepilogo del profilo
-2. 2-3 possibili aree di studio
-3. Consigli per i prossimi passi
+1. Un breve riepilogo di ciò che hai capito del profilo (2-3 frasi)
+2. 2-3 possibili percorsi che potrebbero interessargli (es: Università, ITS, formazione specifica)
+3. Una domanda per approfondire o chiarire qualcosa
 
-Sii incoraggiante e professionale."""
+Sii incoraggiante, professionale e specifico. Non inventare corsi specifici, ma indica aree generali."""
         
         try:
             response = self.client.models.generate_content(
@@ -334,13 +270,14 @@ Sii incoraggiante e professionale."""
                 contents=prompt,
                 config=types.GenerateContentConfig(
                     temperature=self.temperature,
-                    max_output_tokens=1000
+                    max_output_tokens=800
                 )
             )
             return response.text.strip()
         except Exception as e:
             print(f"❌ Errore Gemini (raccomandazioni): {e}")
-            return "Grazie per le informazioni! Ho analizzato il tuo profilo. Considera di consultare i siti ufficiali delle università per informazioni aggiornate sui corsi."
+            return "Grazie per tutte le informazioni! Ho un quadro più chiaro. Potresti dirmi se hai preferenze particolari sul tipo di istituzione (pubblico/privato) o sulla durata degli studi?"
+    
     def _build_profile_context(self, profile: StudentProfile, last_message: str = "") -> str:
         """Costruisce il contesto del profilo per Gemini."""
         context_lines = [
