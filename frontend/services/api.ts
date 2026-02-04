@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // ⚠️ MODIFICA QUESTA RIGA! Usa il TUO URL del backend
-const API_BASE_URL = 'https://fluffy-waddle-5g99rp4w79346xq-8000.app.github.dev';
+const API_BASE_URL = '';
 
 // Crea istanza axios configurata
 const api = axios.create({

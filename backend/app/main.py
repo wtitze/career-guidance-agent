@@ -115,9 +115,8 @@ async def chat_endpoint(request: ChatRequest):
                 session_id = str(uuid.uuid4())
                 initial_history = []
             
-            # Inizializza sessione nello state_manager
-            if hasattr(state_manager, 'create_session'):
-                state_manager.create_session()
+            # Inizializza sessione nello state_manager (già creato da start_new_conversation)
+            # (rimosso create_session ridondante per evitare sessioni non correlate)
         
         # Processa il messaggio
         if hasattr(orientation_agent, 'process_message'):

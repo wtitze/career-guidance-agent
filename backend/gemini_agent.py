@@ -40,7 +40,7 @@ class GeminiOrientationAgent:
             raise ValueError(f"❌ Errore: {e}")
         
         # Configurazioni
-        self.model_name = os.getenv("GEMINI_MODEL", "gemini-2.5-flash-lite")
+        self.model_name = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
         self.temperature = float(os.getenv("AGENT_TEMPERATURE", 0.7))
     
     def process_message(self, session_id: str, user_message: str) -> Tuple[str, StudentProfile]:

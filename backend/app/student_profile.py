@@ -36,6 +36,7 @@ class StudentProfile(BaseModel):
     
     # === C. Obiettivi e Vincoli ===
     primary_goal: Optional[str] = None  # "occupazione", "stipendio", "passione", "prestigio"
+    wants_tertiary_education: Optional[bool] = None  # Vuole università/ITS? None=indeciso, True=sì, False=no (vuole lavoro diretto)
     further_studies: Optional[bool] = None  # Intende fare Master/Dottorato?
     preferred_course_length: Optional[str] = None  # "breve", "triennale", "lungo"
     institution_preference: Optional[str] = None  # "pubblico", "privato", "indifferente"
@@ -66,7 +67,7 @@ class StudentProfile(BaseModel):
         """Calcola quanto è completo il profilo (semplificato)."""
         critical_fields = [
             'location', 'school_type', 'favorite_subjects', 
-            'primary_goal', 'institution_preference'
+            'primary_goal', 'wants_tertiary_education'
         ]
         
         completed = 0
@@ -98,7 +99,9 @@ class StudentProfile(BaseModel):
         # Priority 2: Informazioni importanti
         if not self.primary_goal:
             self.missing_info_priority.append("primary_goal")
-        if not self.institution_preference:
+        if self.wants_tertiary_education is None:
+            self.missing_info_priority.append("wants_tertiary_education")
+        if not self.institution_preference and self.wants_tertiary_education:
             self.missing_info_priority.append("institution_preference")
         if self.willing_to_relocate is None:
             self.missing_info_priority.append("willing_to_relocate")

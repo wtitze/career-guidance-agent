@@ -13,35 +13,63 @@ interface Message {
 }
 
 export default function ChatInterface() {
-  // Stato per i messaggi
-  const [messages, setMessages] = useState<Message[]>([
-    { 
-      text: "Ciao! Sono il tuo assistente per l'orientamento post-diploma. Posso aiutarti a scoprire università, corsi ITS, opportunità di lavoro e molto altro. Cosa ti interessa sapere?", 
-      isUser: false,
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+
+  // Stato per i messaggi (con persistenza)
+  const [messages, setMessages] = useState<Message[]>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('cg_messages');
+      if (saved) return JSON.parse(saved);
     }
-  ]);
-  
+    return [{
+      text: "Ciao! Sono il tuo assistente per l'orientamento post-diploma. Posso aiutarti a scoprire università, corsi ITS, opportunità di lavoro e molto altro. Cosa ti interessa sapere?",
+      isUser: false,
+      timestamp: "Ora"
+    }];
+  });
+
   // Stato per l'input utente
   const [input, setInput] = useState('');
-  
+
   // Stato per il caricamento
   const [loading, setLoading] = useState(false);
-  
-  // Stato per la session ID
-  const [sessionId, setSessionId] = useState<string | undefined>();
-  
+
+  // Stato per la session ID (con persistenza)
+  const [sessionId, setSessionId] = useState<string | undefined>(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('cg_sessionId') || undefined;
+    }
+    return undefined;
+  });
+
   // Ref per scroll automatico
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  // Ref per input focus
+  const inputRef = useRef<HTMLTextAreaElement>(null);
 
   // Scroll automatico all'ultimo messaggio
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
+
+  // Scroll e focus automatico dopo ogni risposta
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+    if (!loading) {
+      inputRef.current?.focus();
+    }
+    // Salva stato su localStorage
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('cg_messages', JSON.stringify(messages));
+    }
+  }, [messages, loading]);
+
+  // Salva sessionId su localStorage
+  useEffect(() => {
+    if (sessionId && typeof window !== 'undefined') {
+      localStorage.setItem('cg_sessionId', sessionId);
+    }
+  }, [sessionId]);
 
   // Funzione per inviare un messaggio
   const handleSend = async () => {
@@ -186,6 +214,7 @@ export default function ChatInterface() {
           <div className="flex space-x-3">
             <div className="flex-1 relative">
               <textarea
+                ref={inputRef}
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyPress={handleKeyPress}
